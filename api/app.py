@@ -10,7 +10,9 @@ GET  /baseline         → run baseline agent on all tasks
 GET  /baseline/<task_id> → run baseline agent on a single task
 GET  /health           → liveness check
 """
-
+from baseline.baseline import run_baseline_on_task
+from tasks.tasks import TASKS
+import datetime
 import sys
 import os
 
@@ -132,68 +134,44 @@ def get_task_detail(task_id: str):
 
 # ── /grader ─────────────────────────────────────────────────────────────────
 
-@app.post("/grader")
+@app.route("/grader", methods=["POST"])
 def grader():
-    """
-    Score a cloud provider selection against a task.
+    data = request.json
 
-    Request body (JSON)
-    -------------------
-    {
-        "task_id":       "easy",
-        "selected_cloud": "gcp"
-    }
+    if not data or "task_id" not in data or "selected_cloud" not in data:
+        return {"error": "Invalid input"}, 400
 
-    Response
-    --------
-    {
-        "task_id":        "easy",
-        "selected_cloud": "gcp",
-        "cost":           40,
-        "latency":        58,
-        "sla_max_latency": 90,
-        "sla_met":        true,
-        "reward":         0.92,
-        "grade":          "excellent"
-    }
-    """
-    body = request.get_json(silent=True)
+    task_id = data["task_id"]
+    selected_cloud = data["selected_cloud"]
 
-    if not body:
-        return _error("Request body must be valid JSON.")
+    if task_id not in TASKS:
+        return {"error": "Invalid task_id"}, 400
 
-    task_id        = body.get("task_id")
-    selected_cloud = body.get("selected_cloud")
+    task = TASKS[task_id]
 
-    if not task_id:
-        return _error("Missing required field: 'task_id'.")
-    if not selected_cloud:
-        return _error("Missing required field: 'selected_cloud'.")
-    if selected_cloud not in PROVIDERS:
-        return _error(f"Invalid 'selected_cloud'. Must be one of: {PROVIDERS}.")
-
-    task, err = _validate_task_id(task_id)
-    if err:
-        return err
-
-    # Run the environment with the fixed task (no noise for reproducibility)
-    env   = CloudEnvironment(task=task, noise=0.0)
+    env = CloudEnvironment(task=task, noise=0.0)
     state = env.reset()
-    _, reward, _, info = env.step(selected_cloud)
 
-    # Human-readable grade
-    grade = _grade(reward, info["sla_met"])
+    next_state, reward, done, info = env.step(selected_cloud)
 
-    return jsonify({
-        "task_id":         task_id,
-        "selected_cloud":  info["selected_cloud"],
-        "cost":            info["cost"],
-        "latency":         info["latency"],
-        "sla_max_latency": info["sla_max_latency"],
-        "sla_met":         info["sla_met"],
-        "reward":          info["reward"],
-        "grade":           grade,
-    })
+    # 🔥 Baseline comparison
+    baseline_result = run_baseline_on_task(task)
+    baseline_reward = baseline_result["reward"]
+
+    return {
+    "task_id": task_id,
+    "selected_cloud": selected_cloud,
+    "cost": info["cost"],
+    "latency": info["latency"],
+    "sla_max_latency": task["sla_max_latency"],
+    "sla_met": info["latency"] <= task["sla_max_latency"],
+    "reward": round(reward, 4),
+    "baseline_reward": round(baseline_reward, 4),
+    "better_than_baseline": reward > baseline_reward,
+    "is_optimal": selected_cloud == task.get("optimal_cloud"),
+    "grade": _grade(reward, info["latency"] <= task["sla_max_latency"]),
+    "timestamp": datetime.datetime.utcnow().isoformat()
+}
 
 
 # ── /baseline ────────────────────────────────────────────────────────────────
@@ -289,6 +267,34 @@ def compare_all_providers(task_id: str):
         "sla_max_latency": task["sla_max_latency"],
         "scores":          scores,
         "best_provider":   best,
+    })
+    
+@app.get("/compare_all")
+def compare_all():
+    output = {}
+
+    for task_id in TASKS:
+        env = CloudEnvironment(task=TASKS[task_id], noise=0.0)
+        env.reset()
+
+        scores = {}
+        for provider in PROVIDERS:
+            _, _, _, info = env.step(provider)
+            scores[provider] = info
+
+        output[task_id] = scores
+
+    return jsonify(output)    
+
+@app.get("/leaderboard")
+def leaderboard():
+    results = run_baseline(verbose=False)["results"]
+
+    sorted_results = sorted(results, key=lambda x: x["reward"], reverse=True)
+
+    return jsonify({
+        "top_performers": sorted_results,
+        "message": "Leaderboard based on reward score"
     })
 
 

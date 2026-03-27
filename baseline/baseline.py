@@ -127,14 +127,31 @@ def run_baseline(verbose: bool = True) -> Dict[str, Any]:
 # Single-task evaluation (used by Flask /baseline endpoint)
 # ---------------------------------------------------------------------------
 
-def run_baseline_on_task(task: Dict[str, Any]) -> Dict[str, Any]:
-    """Run the baseline agent on a single task dict and return the info dict."""
-    env    = CloudEnvironment(task=task, noise=0.0)
-    state  = env.reset()
-    action = select_cloud(state)
-    _, _, _, info = env.step(action)
-    info["strategy"] = "cheapest_sla_compliant"
-    return info
+def run_baseline_on_task(task):
+    providers = task["providers"]
+    sla = task["sla_max_latency"]
+
+    valid = {
+        k: v for k, v in providers.items() if v["latency"] <= sla
+    }
+
+    if valid:
+        best = min(valid.items(), key=lambda x: x[1]["cost"])
+    else:
+        best = min(providers.items(), key=lambda x: x[1]["latency"])
+
+    cloud, metrics = best
+
+    # simple reward estimate
+    reward = 0.8 if metrics["latency"] <= sla else 0.0
+
+    return {
+        "selected_cloud": cloud,
+        "cost": metrics["cost"],
+        "latency": metrics["latency"],
+        "reward": reward
+    }
+
 
 
 # ---------------------------------------------------------------------------

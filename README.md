@@ -1,3 +1,4 @@
+---
 title: SLA-Aware Multi-Cloud Cost Optimizer
 emoji: 🚀
 colorFrom: blue
@@ -5,6 +6,7 @@ colorTo: green
 sdk: docker
 app_port: 7860
 pinned: false
+---
 
 # SLA-Aware Multi-Cloud Cost Optimizer
 
