@@ -1,0 +1,28 @@
+name: multi-cloud-optimizer
+version: 1.0
+
+environment:
+  observation_space:
+    job_type: string
+    sla_max_latency: float
+    providers:
+      aws:
+        cost: float
+        latency: float
+      azure:
+        cost: float
+        latency: float
+      gcp:
+        cost: float
+        latency: float
+
+  action_space:
+    type: discrete
+    values: ["aws", "azure", "gcp"]
+
+endpoints:
+  reset: /reset
+  step: /step
+  state: /state
+
+reward_range: [0.0, 1.0]

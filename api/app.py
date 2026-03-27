@@ -15,17 +15,16 @@ from tasks.tasks import TASKS
 import datetime
 import sys
 import os
-
-# Ensure sibling packages are importable regardless of working directory
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT)
-
 from flask import Flask, request, jsonify, Response
-
 from env.cloud_env  import CloudEnvironment, PROVIDERS
 from tasks.tasks    import TASKS, list_tasks, get_task
 from baseline.baseline import run_baseline, run_baseline_on_task
 
+global_env = None
+
+# Ensure sibling packages are importable regardless of working directory
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -58,6 +57,40 @@ def _validate_task_id(task_id: str):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
+@app.get("/reset")
+def reset_env():
+    global global_env
+    global_env = CloudEnvironment()
+    state = global_env.reset()
+    return jsonify(state)
+
+@app.post("/step")
+def step_env():
+    global global_env
+
+    data = request.json
+    action = data.get("action")
+
+    if not global_env:
+        return {"error": "Environment not initialized"}, 400
+
+    state, reward, done, info = global_env.step(action)
+
+    return jsonify({
+        "state": state,
+        "reward": reward,
+        "done": done,
+        "info": info
+    })
+    
+@app.get("/state")
+def get_state():
+    global global_env
+
+    if not global_env:
+        return {"error": "Environment not initialized"}, 400
+
+    return jsonify(global_env.get_state())    
 
 @app.get("/health")
 def health():
