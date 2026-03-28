@@ -69,7 +69,7 @@ This environment frames it as a sequential decision problem that an RL agent or 
 ## 📁 Project Structure
 
 ```
-multi-cloud-optimizer/
+multi_cloud_optimizer/
 ├── env/
 │   ├── cloud_env.py       # OpenEnv environment (reset, step, get_state)
 │   └── models.py          # Pydantic typed models (Observation, Action, Reward)
@@ -94,8 +94,8 @@ multi-cloud-optimizer/
 
 ```bash
 # 1. Clone and install
-git clone https://huggingface.co/spaces/nityanama/multi-cloud-optimizer
-cd multi-cloud-optimizer
+git clone https://huggingface.co/spaces/nityanama/multi_cloud_optimizer
+cd multi_cloud_optimizer
 pip install -r requirements.txt
 
 # 2. Set environment variables
@@ -132,7 +132,7 @@ https://nityanama-multi_cloud_optimizer.hf.space
 
 ## 🔌 API Reference
 
-Base URL: `http://localhost:7860` (local) or `https://nityanama-multi-cloud-optimizer.hf.space` (HF)
+Base URL: `http://localhost:7860` (local) or `https://nityanama-multi_cloud_optimizer.hf.space` (HF)
 
 ### OpenEnv Core Endpoints
 
