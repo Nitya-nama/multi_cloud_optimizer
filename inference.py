@@ -32,7 +32,10 @@ client = OpenAI(
     base_url=API_BASE_URL if API_BASE_URL != "http://localhost:7860" else None,
 )
 
-ENV_BASE_URL = "http://localhost:7860"    # Always call the local env server
+ENV_BASE_URL = os.getenv(
+    "ENV_BASE_URL",
+    "https://nityanama-multi-cloud-optimizer.hf.space"
+)    # Always call the local env server
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
