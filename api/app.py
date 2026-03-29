@@ -116,14 +116,27 @@ def health():
 
 @app.route("/", methods=["GET"])
 def home():
-    return {
+    return jsonify({
         "message": "SLA-Aware Multi-Cloud Cost Optimizer API",
-        "available_endpoints": [
-            "/tasks",
-            "/grader (POST)",
-            "/baseline"
-        ]
-    }
+        "version": "1.0",
+        "openenv_endpoints": {
+            "GET  /reset":  "Start a new episode — returns initial observation",
+            "POST /step":   "Take an action (aws/azure/gcp) — returns reward & state",
+            "GET  /state":  "Get current environment state without stepping",
+        },
+        "task_endpoints": {
+            "GET  /tasks":              "List all 5 benchmark tasks",
+            "GET  /tasks/<task_id>":    "Full provider metrics for a specific task",
+            "POST /grader":             "Score a cloud provider selection (0.0–1.0)",
+            "GET  /baseline":           "Run greedy baseline agent on all tasks",
+            "GET  /baseline/<task_id>": "Run baseline on a single task",
+            "GET  /compare/<task_id>":  "Compare all 3 providers on a task",
+        },
+        "other": {
+            "GET  /health":    "Liveness check",
+            "GET  /leaderboard": "Top performers by reward score",
+        }
+    })
 
 # ── /tasks ──────────────────────────────────────────────────────────────────
 
