@@ -195,7 +195,7 @@ reward = 0.75 * cost_score \
 /insights/{task}
 → Compares cheapest vs fastest vs optimal
 
-🔁 Counterfactual Analysis
+## 🔁 Counterfactual Analysis
 
 /what_if/{task}?action=aws
 → Evaluates impact of suboptimal decisions
