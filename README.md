@@ -1,149 +1,138 @@
 # 🚀 AI-Powered SLA-Aware Multi-Cloud Optimization Environment
 
-> 🚀 Trains AI agents to make real-world cloud routing decisions under practical SLA constraints — similar to production systems used in large-scale cloud infrastructure.
+> 🚀 Simulates real-world cloud routing decisions under practical SLA constraints using an AI-driven environment.
 
-> An OpenEnv-compatible reinforcement learning environment where AI agents learn to optimize **cost vs latency vs SLA trade-offs** across AWS, Azure, and GCP.
+An OpenEnv-compatible system where agents optimize:
 
-Built for the **Meta × PyTorch Hackathon 2026** hosted by Scaler School of Technology.
+👉 **Cost vs Latency vs SLA trade-offs** across AWS, Azure, and GCP
+
+Built for the **Meta × PyTorch Hackathon 2026**
 
 ---
 
 ## 🧠 Problem
 
-Modern cloud systems face complex decision-making challenges.
+Modern cloud systems must make complex decisions.
 
-Choosing the cheapest provider is not enough — real-world systems must balance:
+Choosing the cheapest provider is not enough — systems must balance:
 
-- SLA compliance  
-- Cost vs performance trade-offs  
-- Dynamic and context-aware decision-making  
+- SLA (latency constraints)  
+- Cost efficiency  
+- Dynamic cloud conditions  
 
-Traditional rule-based systems fail to handle these multi-objective constraints effectively.
+Traditional rule-based approaches fail to handle these trade-offs effectively.
 
 ---
 
 ## 💡 Solution
 
-We built an OpenEnv-compatible environment where AI agents:
+We model cloud routing as a **decision-making environment**.
 
-- Select optimal cloud providers (AWS, Azure, GCP)  
-- Respect strict latency constraints (SLA)  
-- Optimize cost under real-world trade-offs  
+Agents interact with the system by:
 
-This transforms cloud routing into a **reinforcement learning problem**, enabling intelligent agents to learn optimal strategies over time.
+- Observing cloud conditions  
+- Selecting a provider  
+- Receiving a reward based on performance  
 
----
-
-## 🧠 AI Component
-
-This project is designed as an **AI-first system**:
-
-- Frames cloud routing as a **reinforcement learning problem**  
-- Uses a **reward function** to guide optimal decision-making  
-- Supports integration with **PyTorch-based RL agents (PPO, DQN)**  
-- Includes an **LLM-based agent baseline** for intelligent reasoning  
-
-👉 Enables training, evaluation, and benchmarking of AI agents in real-world optimization scenarios.
+This enables intelligent optimization of real-world cloud decisions.
 
 ---
 
-## ✨ Key Features
+## 🤖 AI Component
 
-- ✅ Full **OpenEnv spec** compliance — `step()`, `reset()`, `state()`, `openenv.yaml`
-- ✅ **Pydantic typed models** — `Observation`, `Action`, `Reward`, `StepResponse`
-- ✅ **5 benchmark tasks** spanning easy → medium → hard difficulty
-- ✅ **Continuous reward** in `[0, 1]` — not sparse, not binary
-- ✅ **LLM baseline agent** using OpenAI-compatible client
-- ✅ **Deterministic graders** — reproducible evaluation
-- ✅ Deployed on **Hugging Face Spaces** with Docker
-- ✅ Flask REST API with full endpoint coverage
+This project is designed as an **AI-driven environment**:
 
----
+- Reinforcement learning structure:
+  - **State → Action → Reward**
+- Continuous reward function (not binary)
+- Deterministic evaluation (grading system)
+- Supports integration with intelligent agents
 
-## 🌐 Live Demo
-
-👉 https://nityanama-multi_cloud_optimizer.hf.space  
+👉 Designed to evaluate reasoning capabilities of AI agents under real-world constraints
 
 ---
 
-## 🎥 Demo
-### Example Flow:
+## ⚙️ How It Works
 
-**Input:**
-- Cloud providers data  
-- Latency constraints  
-- Cost parameters  
 
-**Output:**
-- Optimal provider selection  
-- Reward score (0–1)  
-- SLA compliance result  
-
-### Sample Output:
-
-```json
-{
-  "baseline_reward": 0.9033,
-  "better_than_baseline": true,
-  "cost": 40,
-  "grade": "excellent",
-  "is_optimal": true,
-  "latency": 58,
-  "reward": 0.9033,
-  "selected_cloud": "gcp",
-  "sla_max_latency": 90
-}
-```
-
----
-
-## 🔁 How It Works
-
-```
+```python
 observation = env.reset()
 action = agent.act(observation)
 obs, reward, done, info = env.step(action)
 ```
+
 - Agent observes cloud conditions  
-- Selects provider  
+- Selects a cloud provider  
 - Receives reward based on SLA + cost efficiency  
 
----
-
 ## 🏆 Reward Function
-
+```python
+reward = 0.0  # if SLA violated
+reward = 0.75 * cost_score \
+       + 0.15 * latency_headroom_ratio \
+       + 0.10 * efficiency_bonus
 ```
-reward = 0.0 ← SLA violated
-       = 0.75 × cost_score
-       + 0.15 × latency_headroom_ratio
-       + 0.10 × efficiency_bonus
+
+- Penalizes SLA violations
+- Rewards cost efficiency
+- Encourages optimal decisions
+
+## ✨ Key Features
+✅ OpenEnv-compatible environment (reset, step, state)
+✅ Multi-cloud simulation (AWS, Azure, GCP)
+✅ Continuous reward system (not sparse)
+✅ Benchmark tasks (easy → medium → hard)
+✅ Deterministic grading system
+✅ Flask-based REST API
+✅ Deployable via Docker / Hugging Face Spaces
+⭐ Advanced Features (WOW Factor)
+🔍 Explainability
+
+/explain/{task}
+→ Shows reasoning behind decisions and rejected options
+
+## 📊 Insights
+
+/insights/{task}
+→ Compares cheapest vs fastest vs optimal
+
+🔁 Counterfactual Analysis
+
+/what_if/{task}?action=aws
+→ Evaluates impact of suboptimal decisions
+
+👉 Includes counterfactual reasoning to analyze decision quality
+
+## 📸 Example Output
+
+```json
+{
+  "selected_cloud": "gcp",
+  "latency": 58,
+  "cost": 40,
+  "sla_max_latency": 90,
+  "reward": 0.9033,
+  "grade": "excellent"
+}
 ```
 
-- Penalizes SLA violations  
-- Rewards cost efficiency  
-- Encourages optimal decision-making  
+## 🌐 Live Demo
 
-
-
-## 📊 Impact
-
-This project can be used for:
-
-- Training AI agents for real-world infrastructure decisions  
-- Cloud cost optimization systems  
-- Reinforcement learning research  
-- Intelligent DevOps and FinOps tools  
+👉 https://nityanama-multi_cloud_optimizer.hf.space
 
 ---
-
 ## 📁 Project Structure
-
 ```
-multi_cloud_optimizer/
+SCALER_FLAT/
 ├── env/
+│   ├── cloud_env.py
+│   └── models.py
 ├── api/
+│   └── app.py
 ├── tasks/
+│   └── tasks.py
 ├── baseline/
+│   └── baseline.py
 ├── inference.py
 ├── openenv.yaml
 ├── Dockerfile
@@ -152,24 +141,45 @@ multi_cloud_optimizer/
 ```
 
 ---
+## 🔌 API Example
 
-## 🤖 AI Baseline
+```bash
+GET /reset
+curl http://localhost:7860/reset
+```
 
-- Greedy rule-based agent  
-- LLM-based agent (Qwen)  
-- Comparable performance benchmarking  
+**Response:**
 
----
+```json
+{
+  "baseline_reward": 0.9033,
+  "better_than_baseline": true,
+  "cost": 40,
+  "grade": "excellent",
+  "latency": 58,
+  "reward": 0.9033,
+  "selected_cloud": "gcp",
+  "sla_max_latency": 90
+}
+```
+
+
+## 📊 Impact
+
+- AI-based cloud optimization systems
+- Reinforcement learning experimentation
+- DevOps / FinOps intelligent decision systems
+- Benchmarking AI reasoning beyond text generation
+
+
 
 ## 🔮 Future Scope
+- Multi-step decision environments
+- Dynamic pricing simulation
+- Multi-region cloud modeling
+- RL training integration (PPO/DQN)
+- Visualization dashboard
 
-- Full RL agent training (PPO/DQN with PyTorch)  
-- Dynamic pricing simulation  
-- Multi-region cloud optimization  
-- Frontend dashboard for visualization  
-- Multi-agent benchmarking  
-
----
 
 ## 👥 Team
 
@@ -177,8 +187,6 @@ multi_cloud_optimizer/
 - Vanditha Hamsa S B  
 - Chandan N  
 
----
-
 ## 📄 License
 
-MIT — free to use for research and hackathon purposes.
+MIT — free to use for research and hackathons
