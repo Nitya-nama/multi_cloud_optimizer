@@ -109,10 +109,7 @@ This enables intelligent optimization of real-world cloud decisions.
 
 ```
 multi_cloud_optimizer/
-├── env/
-├── api/
-├── tasks/
-├── baseline/
+├── app.py
 ├── inference.py
 ├── Dockerfile
 ├── requirements.txt
