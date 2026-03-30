@@ -1,0 +1,16 @@
+[project]
+name = "multi-cloud-optimizer"
+version = "0.1.0"
+description = "AI-powered SLA-aware multi-cloud optimization environment"
+authors = [
+    { name="Nitya Nama","Chandan N","Vanditha H" }
+]
+dependencies = [
+    "flask",
+    "numpy",
+    "pydantic"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
