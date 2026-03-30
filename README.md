@@ -219,14 +219,12 @@ reward = 0.75 * cost_score \
 
 
 
-
 ## 📊 Impact
 
 - AI-based cloud optimization systems
 - Reinforcement learning experimentation
 - DevOps / FinOps intelligent decision systems
 - Benchmarking AI reasoning beyond text generation
-
 
 
 ## 🔮 Future Scope
