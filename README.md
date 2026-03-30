@@ -123,6 +123,28 @@ https://nityanama-multi_cloud_optimizer.hf.space
 ```
 
 ---
+## 🏗️ System Flow
+
+User Request → Flask API → Cloud Environment → Reward Engine → Optimal Cloud Selection
+
+- The API receives a task request
+- The environment simulates cloud providers (AWS, Azure, GCP)
+- The decision engine evaluates cost, latency, and SLA constraints
+- A reward is computed based on performance
+- The system outputs the optimal cloud provider
+
+
+## 🔁 How It Works
+
+```
+observation = env.reset()
+action = agent.act(observation)
+obs, reward, done, info = env.step(action)
+```
+
+- Agent observes cloud conditions  
+- Selects a cloud provider  
+- Receives reward based on SLA + cost efficiency
 
 ## 🔌 API Reference
 
@@ -149,20 +171,7 @@ curl http://localhost:7860/reset
   "sla_max_latency": 90
 }
 ```
-
----
-
-## 🔁 How It Works
-
-```
-observation = env.reset()
-action = agent.act(observation)
-obs, reward, done, info = env.step(action)
-```
-
-- Agent observes cloud conditions  
-- Selects a cloud provider  
-- Receives reward based on SLA + cost efficiency  
+  
 
 ## 🏆 Reward Function
 ```python
@@ -217,7 +226,7 @@ reward = 0.75 * cost_score \
 
 ---
 
-=======
+
 ## 📊 Impact
 
 - AI-based cloud optimization systems
@@ -225,7 +234,7 @@ reward = 0.75 * cost_score \
 - DevOps / FinOps intelligent decision systems
 - Benchmarking AI reasoning beyond text generation
 
-=======
+
 
 ## 🔮 Future Scope
 - Multi-step decision environments
