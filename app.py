@@ -380,15 +380,37 @@ def insights(task_id):
 
     task = TASKS[task_id]
     providers = task["providers"]
+    sla = task["sla_max_latency"]
 
-    cheapest = min(providers, key=lambda p: providers[p]["cost"])
-    fastest = min(providers, key=lambda p: providers[p]["latency"])
+    # Filter SLA-compliant providers
+    valid = {
+        p: m for p, m in providers.items()
+        if m["latency"] <= sla
+    }
+
+    if not valid:
+        return jsonify({
+            "error": "No providers meet SLA",
+            "insight": "All providers violate SLA — no valid solution exists"
+        })
+
+    cheapest = min(valid, key=lambda p: valid[p]["cost"])
+    fastest = min(valid, key=lambda p: valid[p]["latency"])
+
+    # 🔥 Dynamic reasoning
+    if len(valid) == 1:
+        insight = "Only one provider satisfies SLA — constrained decision"
+    elif cheapest == fastest:
+        insight = "One provider dominates both cost and latency — trivial decision"
+    else:
+        insight = f"Trade-off: {cheapest} is cheaper, but {fastest} is faster under SLA"
 
     return jsonify({
-        "cheapest_provider": cheapest,
-        "fastest_provider": fastest,
+        "cheapest_valid_provider": cheapest,
+        "fastest_valid_provider": fastest,
+        "valid_providers": list(valid.keys()),
         "tradeoff_exists": cheapest != fastest,
-        "insight": "Optimal decision depends on SLA, not just cost"
+        "insight": insight
     })
     
 @app.get("/agent_vs_baseline")
@@ -414,14 +436,27 @@ def agent_vs_baseline():
 @app.route("/")
 def home():
     return jsonify({
-        "message": "SLA-Aware Multi-Cloud Cost Optimizer API",
-        "type": "AI Decision-Making Benchmark (OpenEnv)",
+        "message": "AI Decision-Making Benchmark for Cloud Optimization",
         "status": "running",
         "core_endpoints": ["/reset", "/step", "/state"],
         "evaluation": ["/tasks", "/grader", "/baseline"],
-        "advanced": ["/explain/<task_id>", "/insights/<task_id>", "/agent_vs_baseline" , "/what_if/<task_id>"],
-        "docs": "/docs"
+        "advanced": ["/run_agent","/explain/<task_id>", "/insights/<task_id>", "/agent_vs_baseline" , "/what_if/<task_id>"],
+        "docs": "/docs",
+        "try_this": [
+            "/reset",
+            "/what_if/hard?action=aws",
+            "/explain/hard",
+            "/insights/hard"
+        ]
     })
+
+@app.get("/run_agent")
+def run_agent():
+    try:
+        from inference import run_inference
+        return jsonify(run_inference())
+    except Exception as e:
+        return _error(str(e))    
     
 @app.get("/what_if/<task_id>")
 def what_if(task_id):
@@ -444,7 +479,7 @@ def what_if(task_id):
     return jsonify({
         "task_id": task_id,
         "chosen_action": action,
-        "optimal_action": optimal,
+        "optimal_action": optimal or "none",
         "chosen_result": {
             "reward": round(reward, 4),
             "cost": info["cost"],
