@@ -101,7 +101,7 @@ This enables intelligent optimization of real-world cloud decisions.
 
 ## 🌐 Live Demo
 
-👉 https://nityanama-multi_cloud_optimizer.hf.space  
+👉 https://nityanama-multi-cloud-optimizer.hf.space/
 
 ---
 
