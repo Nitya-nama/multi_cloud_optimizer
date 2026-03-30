@@ -217,9 +217,7 @@ reward = 0.75 * cost_score \
 
 ---
 
-
-
-
+=======
 ## 📊 Impact
 
 - AI-based cloud optimization systems
@@ -227,7 +225,7 @@ reward = 0.75 * cost_score \
 - DevOps / FinOps intelligent decision systems
 - Benchmarking AI reasoning beyond text generation
 
-
+=======
 
 ## 🔮 Future Scope
 - Multi-step decision environments
@@ -245,4 +243,6 @@ reward = 0.75 * cost_score \
 
 ## 📄 License
 
+
 MIT — free to use for research and hackathons
+
