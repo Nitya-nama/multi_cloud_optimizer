@@ -224,7 +224,7 @@ def _grade(reward: float, sla_met: bool) -> str:
     return "poor"
 
 
-@app.get("/reset")
+@app.route("/reset" , methods=["GET","POST"])
 def reset_env():
     global global_env
     global_env = CloudEnvironment()
