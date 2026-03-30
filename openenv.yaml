@@ -1,0 +1,45 @@
+name: multi-cloud-optimizer
+version: 1.0
+
+environment:
+  observation_space:
+    job_type: string
+    sla_max_latency: float
+    providers:
+      aws:
+        cost: float
+        latency: float
+      azure:
+        cost: float
+        latency: float
+      gcp:
+        cost: float
+        latency: float
+
+  action_space:
+    type: discrete
+    values: ["aws", "azure", "gcp"]
+
+endpoints:
+  reset: /reset
+  step: /step
+  state: /state
+
+reward_range: [0.0, 1.0]
+
+tasks:
+  - id: easy
+    difficulty: easy
+    description: "API request with relaxed SLA. GCP is cheapest and fastest."
+  - id: medium
+    difficulty: medium
+    description: "Batch job where the cheapest option exceeds latency SLA."
+  - id: hard
+    difficulty: hard
+    description: "ML training job with strict SLA. Misleading sticker prices."
+  - id: bonus_cost
+    difficulty: easy
+    description: "All providers meet SLA. Straightforward cost minimization."
+  - id: bonus_strict_sla
+    difficulty: hard
+    description: "Ultra-tight 60ms SLA; only one provider qualifies."

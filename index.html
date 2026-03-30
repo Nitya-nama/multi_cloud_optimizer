@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Optimizer Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #6e92c2, #f0f9ff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 34px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .controls {
+            margin-bottom: 25px;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            margin: 8px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            background: rgb(234, 238, 239);
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: scale(1.08);
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .card {
+            padding: 25px;
+            width: 300px;
+            background: rgb(246, 242, 242);
+            border-radius: 18px;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .item {
+            margin: 12px 0;
+            font-size: 18px;
+        }
+
+        .recommended {
+            color: #16a34a;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .chart-container {
+            width: 320px;
+            height: 220px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.1);
+            padding: 15px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌐 Cloud Optimizer Dashboard</h1>
+
+    <div class="controls">
+        <select id="task">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+        <button onclick="getInsights()">Analyze</button>
+    </div>
+
+    <div class="container">
+        <div id="output" class="card"></div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        async function getInsights() {
+            const task = document.getElementById("task").value;
+
+            const res1 = await fetch("https://nityanama-multi-cloud-optimizer.hf.space/reset");
+            const resetData = await res1.json();
+
+            const res2 = await fetch(`https://nityanama-multi-cloud-optimizer.hf.space/insights/${task}`);
+            const data = await res2.json();
+
+            document.getElementById("output").innerHTML = `
+                <div class="item">💰 Cheapest: ${data.cheapest_provider}</div>
+                <div class="item">⚡ Fastest: ${data.fastest_provider}</div>
+                <div class="item recommended">✅ Recommended: ${data.fastest_provider}</div>
+                <div class="item">🧠 Insight: ${data.insight}</div>
+                <div class="item">⚖️ Tradeoff: ${data.tradeoff_exists}</div>
+            `;
+
+            const providers = resetData.providers;
+
+            const labels = Object.keys(providers);
+            const costs = labels.map(p => providers[p].cost);
+            const latency = labels.map(p => providers[p].latency);
+
+            const ctx = document.getElementById("chart").getContext("2d");
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cost',
+                            data: costs,
+                            backgroundColor: '#6366f1'
+                        },
+                        {
+                            label: 'Latency',
+                            data: latency,
+                            backgroundColor: '#22c55e'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
