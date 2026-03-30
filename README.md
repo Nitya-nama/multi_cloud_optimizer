@@ -54,7 +54,7 @@ This enables intelligent optimization of real-world cloud decisions.
   - **State → Action → Reward**
 - Continuous reward system (not binary)
 - Deterministic evaluation (grading system)
-- Supports intelligent agents (LLM / RL)
+- Supports intelligent agents (LLM / RL) using a reward-driven decision framework for SLA-aware optimization.
 
 ---
 
@@ -132,7 +132,18 @@ python app.py
 
 ---
 
-## 🧠 How It Works
+
+## 🏗️ System Flow
+
+User Request → Flask API → Cloud Environment → Reward Engine → Optimal Cloud Selection
+
+- The API receives a task request
+- The environment simulates cloud providers (AWS, Azure, GCP)
+- The decision engine evaluates cost, latency, and SLA constraints
+- A reward is computed based on performance
+- The system outputs the optimal cloud provider
+
+## 🔁 How It Works
 
 ```python
 observation = env.reset()
