@@ -2,14 +2,17 @@
 name = "multi-cloud-optimizer"
 version = "0.1.0"
 description = "AI-powered SLA-aware multi-cloud optimization environment"
-authors = [
-    { name="Nitya Nama","Chandan N","Vanditha H" }
-]
+authors = [{ name = "Nitya Nama" }]
+
 dependencies = [
     "flask",
     "numpy",
-    "pydantic"
+    "pydantic",
+    "openenv-core>=0.2.0"
 ]
+
+[project.scripts]
+server = "server.app:app"
 
 [build-system]
 requires = ["setuptools"]

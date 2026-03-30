@@ -2,7 +2,6 @@
 app.py — Single-file Flask app for the SLA-Aware Multi-Cloud Cost Optimizer.
 All environment, tasks, grader, baseline, and API logic in one file.
 """
-
 import os
 import sys
 import random
@@ -11,6 +10,8 @@ import numpy as np
 from typing import Dict, Any, Tuple, Optional, List, Literal
 from pydantic import BaseModel, Field
 from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 # ─────────────────────────────────────────────────────────────
 # Pydantic Models (OpenEnv spec)
@@ -208,7 +209,7 @@ def run_baseline() -> Dict:
 # Flask app
 # ─────────────────────────────────────────────────────────────
 
-app = Flask(__name__)
+
 app.config["JSON_SORT_KEYS"] = False
 
 global_env = None
