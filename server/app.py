@@ -2,7 +2,6 @@
 app.py — Single-file Flask app for the SLA-Aware Multi-Cloud Cost Optimizer.
 All environment, tasks, grader, baseline, and API logic in one file.
 """
-
 import os
 import sys
 import random
@@ -11,6 +10,8 @@ import numpy as np
 from typing import Dict, Any, Tuple, Optional, List, Literal
 from pydantic import BaseModel, Field
 from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 # ─────────────────────────────────────────────────────────────
 # Pydantic Models (OpenEnv spec)
@@ -208,7 +209,7 @@ def run_baseline() -> Dict:
 # Flask app
 # ─────────────────────────────────────────────────────────────
 
-app = Flask(__name__)
+
 app.config["JSON_SORT_KEYS"] = False
 
 global_env = None
@@ -224,7 +225,7 @@ def _grade(reward: float, sla_met: bool) -> str:
     return "poor"
 
 
-@app.get("/reset")
+@app.route("/reset" , methods=["GET","POST"])
 def reset_env():
     global global_env
     global_env = CloudEnvironment()
@@ -506,6 +507,9 @@ def method_not_allowed(_): return _error("HTTP method not allowed.", 405)
 def internal_error(e): return _error(f"Internal server error: {e}", 500)
 
 
+def main():
+    return main
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=7860)
+    
