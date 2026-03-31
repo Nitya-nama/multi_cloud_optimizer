@@ -507,6 +507,9 @@ def method_not_allowed(_): return _error("HTTP method not allowed.", 405)
 def internal_error(e): return _error(f"Internal server error: {e}", 500)
 
 
+def main():
+    return main
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=7860)
+    
