@@ -1,5 +1,7 @@
 # 🚀 CLOUD OPTIM : AI-Powered SLA-Aware Multi-Cloud Optimization Environment
 
+> 🏆 AI system that learns optimal cloud decisions under SLA constraints using reward-based optimization.
+
 > 🚀 Simulates real-world cloud routing decisions under practical SLA constraints using an AI-driven environment.
 
 An OpenEnv-compatible system where agents optimize:
@@ -70,6 +72,16 @@ This enables intelligent optimization of real-world cloud decisions.
 
 ---
 
+## 🛠️ Tech Stack
+
+- Backend: Flask
+- AI Logic: Reinforcement Learning (reward-based system)
+- Visualization: Charts (Cost vs Latency)
+- Deployment: Hugging Face Spaces / Docker
+- Language: Python
+
+---
+
 ## 📊 Example Output
 
 ```json
@@ -109,12 +121,22 @@ This enables intelligent optimization of real-world cloud decisions.
 
 ```
 multi_cloud_optimizer/
-├── app.py
-├── inference.py
-├── openenv.yaml
-├── Dockerfile
-├── requirements.txt
-└── README.md
+│── assets/
+│   │── dashboard1.png
+│   │── dashboard2.png
+│
+│── server/
+│   │── app.py
+│
+│── .gitignore
+│── Dockerfile
+│── README.md
+│── index.html
+│── inference.py
+│── openenv.yaml
+│── pyproject.toml
+│── requirements.txt
+│── uv.lock
 ```
 
 ---
@@ -127,8 +149,16 @@ multi_cloud_optimizer/
 git clone https://huggingface.co/spaces/nityanama/multi_cloud_optimizer
 cd multi_cloud_optimizer
 pip install -r requirements.txt
-python app.py
+python server/app.py
 ```
+
+---
+## 📡 API Endpoints
+
+- GET /reset → Start new environment
+- POST /step → Take action (aws/azure/gcp)
+- GET /tasks → View available tasks
+- POST /grader → Evaluate your decision
 
 ---
 
@@ -194,3 +224,4 @@ reward = 0.75 * cost_score \
 ## 📄 License
 
 MIT — free to use for research and hackathons
+
