@@ -21,23 +21,23 @@ load_dotenv()
 
 # ── Credentials & config ──────────────────────────────────────────────────────
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:7860")
-MODEL_NAME   = os.getenv("MODEL_NAME",   "gpt-4o-mini")
-HF_TOKEN     = os.getenv("HF_TOKEN",     "")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
 # The OpenAI client points at whatever API_BASE_URL is configured.
 # For Hugging Face-hosted models the base_url is the HF Inference Endpoints
 # URL; authentication uses HF_TOKEN as the API key.
 client = OpenAI(
-    api_key=HF_TOKEN or "dummy",          # OpenAI client requires a non-empty key
+    api_key=HF_TOKEN or "dummy",  # OpenAI client requires a non-empty key
     base_url=API_BASE_URL if API_BASE_URL != "http://localhost:7860" else None,
 )
 
 ENV_BASE_URL = os.getenv(
-    "ENV_BASE_URL",
-    "https://nityanama-multi-cloud-optimizer.hf.space"
-)    # Always call the local env server
+    "ENV_BASE_URL", "https://nityanama-multi-cloud-optimizer.hf.space"
+)  # Always call the local env server
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def get_tasks() -> list:
     """Fetch the list of all benchmark tasks from the environment server."""
@@ -78,24 +78,37 @@ def ask_llm(task: dict) -> str:
     # Pre-filter compliant providers and sort cheapest first
     compliant = {k: v for k, v in providers.items() if v["latency"] <= sla}
     sorted_compliant = sorted(compliant.items(), key=lambda x: x[1]["cost"])
-    compliant_text = "\n".join(
-        f"  {name}: cost=${metrics['cost']}, latency={metrics['latency']}ms {'<-- CHEAPEST' if i == 0 else ''}"
-        for i, (name, metrics) in enumerate(sorted_compliant)
-    ) if compliant else "  (none meet SLA - pick lowest latency)"
+    compliant_text = (
+        "\n".join(
+            f"  {name}: cost=${metrics['cost']}, latency={metrics['latency']}ms {'<-- CHEAPEST' if i == 0 else ''}"
+            for i, (name, metrics) in enumerate(sorted_compliant)
+        )
+        if compliant
+        else "  (none meet SLA - pick lowest latency)"
+    )
 
-    prompt = f"""You are a cloud cost optimizer. Follow these exact steps:
+    prompt = f"""
+You are an intelligent cloud optimizer.
 
-STEP 1: The SLA latency limit is {sla} ms. Any provider with latency > {sla} ms is disqualified.
-STEP 2: From the providers that meet the SLA, pick the one with the LOWEST cost.
-STEP 3: Reply with ONLY that provider name — one word: aws, azure, or gcp.
+Rules:
+1. The SLA latency limit is {sla} ms. Any provider with latency > {sla} ms is disqualified.
+2. From remaining providers:
+   - Prefer LOW cost
+   - ALSO prefer LOW latency (better performance)
+3. Avoid providers that are very close to the SLA limit (they are risky).
+4. If two providers have similar cost, choose the one with LOWER latency.
 
-All providers (sorted cheapest first):
+Choose the BEST trade-off between cost and latency.
+
+All providers:
 {providers_text}
 
-Providers that meet the SLA (latency <= {sla} ms), sorted cheapest first:
+Valid providers (meeting SLA):
 {compliant_text}
 
-Your answer (one word only):"""
+Reply with ONLY ONE WORD:
+aws or azure or gcp
+"""
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
@@ -126,6 +139,7 @@ def _greedy_fallback(task: dict) -> str:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
+
 def run_inference() -> dict:
     """
     Run the LLM agent on all benchmark tasks and return a summary.
@@ -146,12 +160,12 @@ def run_inference() -> dict:
     print(f"  API   : {API_BASE_URL}")
     print("=" * 60)
 
-    tasks   = get_tasks()
+    tasks = get_tasks()
     results = []
 
     for task_summary in tasks:
         task_id = task_summary["task_id"]
-        task    = get_task_detail(task_id)
+        task = get_task_detail(task_id)
 
         print(f"\n[{task_id:<18}] Asking LLM...", end=" ", flush=True)
 
@@ -163,35 +177,39 @@ def run_inference() -> dict:
 
         graded = grade_selection(task_id, selected_cloud)
 
-        reward  = graded["reward"]
+        reward = graded["reward"]
         sla_met = graded["sla_met"]
-        cost    = graded["cost"]
+        cost = graded["cost"]
         latency = graded["latency"]
 
         status = "OK" if sla_met else "SLA VIOLATION"
-        print(f"-> {selected_cloud:<5}  cost={cost:>6.1f}  lat={latency:>6.1f}ms  reward={reward:.4f}  {status}")
+        print(
+            f"-> {selected_cloud:<5}  cost={cost:>6.1f}  lat={latency:>6.1f}ms  reward={reward:.4f}  {status}"
+        )
 
-        results.append({
-            "task_id"        : task_id,
-            "difficulty"     : task_summary["difficulty"],
-            "selected_cloud" : selected_cloud,
-            "cost"           : cost,
-            "latency"        : latency,
-            "sla_max_latency": task["sla_max_latency"],
-            "sla_met"        : sla_met,
-            "reward"         : reward,
-        })
+        results.append(
+            {
+                "task_id": task_id,
+                "difficulty": task_summary["difficulty"],
+                "selected_cloud": selected_cloud,
+                "cost": cost,
+                "latency": latency,
+                "sla_max_latency": task["sla_max_latency"],
+                "sla_met": sla_met,
+                "reward": reward,
+            }
+        )
 
-    total_reward   = sum(r["reward"] for r in results)
+    total_reward = sum(r["reward"] for r in results)
     average_reward = round(total_reward / len(results), 4) if results else 0.0
     sla_violations = sum(1 for r in results if not r["sla_met"])
 
     summary = {
-        "model"          : MODEL_NAME,
+        "model": MODEL_NAME,
         "tasks_evaluated": len(results),
-        "average_reward" : average_reward,
-        "sla_violations" : sla_violations,
-        "results"        : results,
+        "average_reward": average_reward,
+        "sla_violations": sla_violations,
+        "results": results,
     }
 
     print("\n" + "=" * 60)
